@@ -65,12 +65,9 @@ public:
 		return fAccumulator / getMass();
 	}
 
-	//TODO STUFF HERE
-	glm::mat3 virtual Body::calcIntertia(float m, float x, float y, float z) const;
-
 	// physical properties
 	void setCor(float cor) { m_cor = cor; }
-	void setMass(float mass) { m_mass = mass; calcIntertia(m_mass, getScale()[0][0], getScale()[1][1], getScale()[2][2]); }
+	void virtual setMass(float mass) { m_mass = mass; }
 
 
 	Body();
@@ -79,19 +76,7 @@ public:
 
 	void translate(const glm::vec3 &vect);
 	void rotate(float angle, const glm::vec3 &vect);
-	void scale(const glm::vec3 &vect);
+	void virtual scale(const glm::vec3 &vect);
 	void addForce(Force *f) { m_forces.push_back(f); }
 
 };
-
-//TODO INTERTIA METHOD DONE HERE
-glm::mat3 Body::calcIntertia(float m, float x, float y, float z) const {
-	m = getMass();
-
-	glm::mat3 I0;
-	I0[0][0] = 1 / 12 * m * (y * y + z * z);
-	I0[1][1] = 1 / 12 * m * (x * x + z * z);
-	I0[2][2] = 1 / 12 * m * (x * x + y * y);
-
-	return I0;
-}

@@ -61,14 +61,15 @@ int main()
 	RigidBody rb = RigidBody();
 	Mesh m = Mesh::Mesh(Mesh::CUBE);
 	rb.setMesh(m);
+	rb.scale(glm::vec3(1.0f, 3.0f, 1.0f));
 	Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	rb.getMesh().setShader(rbShader);
-
 	rb.translate(glm::vec3(0.0f, 5.0f, 0.0f));
-	rb.setVel(glm::vec3(0.0f, 7.0f, 0.0f));
-	rb.setAngVel(glm::vec3(1.0f, 2.0f, 0.0f));
+	rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb.setMass(3.0f);
 
-	rb.addForce(&g);
+	//rb.addForce(&g);
 
 
 	// Game loop
@@ -108,17 +109,20 @@ int main()
 			
 			for each (Vertex v in rb.getMesh().getVertices())
 			{
-				glm::vec4 rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f) ;
+				glm::vec4 rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
 				if (rbPos.y <= plane.getPos().y)
 				{
-					
+
 					rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
 					rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 					rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 				}
 
 			}
-
+			//TODO IMPULSES
+			//glm::vec3 pushLeft = glm::vec3(-1.0f, 0.0f, 0.0f);
+			//rb.translate(pushLeft * dt);
+			//rb.setAngVel(glm::vec3(0.0f, 0.0f, 1.0f));
 		
 			accumulator -= dt;
 			t += dt;
