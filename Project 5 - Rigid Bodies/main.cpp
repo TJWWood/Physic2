@@ -119,10 +119,10 @@ int main()
 				}
 
 			}
-			//TODO IMPULSES
-			//glm::vec3 pushLeft = glm::vec3(-1.0f, 0.0f, 0.0f);
-			//rb.translate(pushLeft * dt);
-			//rb.setAngVel(glm::vec3(0.0f, 0.0f, 1.0f));
+
+			glm::vec3 impulse;
+			impulse = glm::vec3(-1.0f, 0.0f, 0.0f);
+			rb.translate(impulse / rb.getMass());
 		
 			accumulator -= dt;
 			t += dt;
