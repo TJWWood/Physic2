@@ -65,8 +65,8 @@ int main()
 	Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	rb.getMesh().setShader(rbShader);
 	rb.translate(glm::vec3(0.0f, 5.0f, 0.0f));
-	rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb.setVel(glm::vec3(0.0f, -3.0f, 0.0f));
+	rb.setAngVel(glm::vec3(0.0f, 0.0f, 3.0f));
 	rb.setMass(3.0f);
 
 	//rb.addForce(&g);
@@ -103,27 +103,46 @@ int main()
 			rb.setRotate(glm::mat4(R));
 
 			rb.setAcc(rb.applyForces(rb.getPos(), rb.getVel(), t, dt));
-			rb.setVel(rb.getVel() + (dt * rb.getAcc()));
+			//rb.setVel(rb.getVel() + (dt * rb.getAcc()));
 
 			rb.translate(rb.getVel() * dt);
-			
+
 			for each (Vertex v in rb.getMesh().getVertices())
 			{
 				glm::vec4 rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
 				if (rbPos.y <= plane.getPos().y)
 				{
+					rb.translate(glm::vec3(0.0f,1.0f,0.0f));
+					float e = 1.0f;
+					glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);
+					glm::vec3 Vr = rb.getVel() + rb.getAngVel();
+					glm::vec3 r = v.getCoord() - rb.getPos();
+					Vr = glm::cross(Vr, r);
 
-					rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
-					rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
-					rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+					glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
+
+					float topPart = -(1 + e) * glm::dot(Vr, n);
+					glm::vec3 cross1 = glm::cross(r, n);
+					cross1 = i * cross1;
+					glm::vec3 cross2 = glm::cross(cross1, r);
+
+					float bottomPart = -rb.getMass() + glm::dot(n, (cross2));
+
+					float Jr = topPart / bottomPart;
+
+					rb.setVel(rb.getVel() + (Jr / rb.getMass() * n));
+					rb.setAngVel(rb.getAngVel() + (Jr * rb.getInvInertia() * (glm::cross(r, n))));
+					
+
+					//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
+					//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
+					//rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 				}
 
 			}
 
-			glm::vec3 impulse;
-			impulse = glm::vec3(-1.0f, 0.0f, 0.0f);
-			rb.translate(impulse / rb.getMass());
-		
+
+
 			accumulator -= dt;
 			t += dt;
 		}
@@ -135,15 +154,10 @@ int main()
 		app.clear();
 		// draw groud plane
 		app.draw(plane);
-		// draw particles
 
+		//draw rb
 		app.draw(rb.getMesh());
-		//app.draw(particle1.getMesh());
-		//app.draw(particle2.getMesh());
 
-		// draw demo objects
-		//app.draw(cube);
-		//app.draw(sphere);
 
 		app.display();
 	}
