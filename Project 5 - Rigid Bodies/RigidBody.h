@@ -34,7 +34,7 @@ public:
 		m_mass = mass;
 		std::cout << "Set Mass: " << mass << std::endl;
 		calcIntertia();
-		std::cout << glm::to_string(m_invInertia);
+		//std::cout << glm::to_string(m_invInertia);
 	}
 
 

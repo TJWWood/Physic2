@@ -65,12 +65,14 @@ int main()
 	Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	rb.getMesh().setShader(rbShader);
 	rb.translate(glm::vec3(0.0f, 5.0f, 0.0f));
-	rb.setVel(glm::vec3(0.0f, -3.0f, 0.0f));
-	rb.setAngVel(glm::vec3(0.0f, 0.0f, 3.0f));
-	rb.setMass(3.0f);
+	rb.setVel(glm::vec3(0.0f, -1.0f, 0.0f));
+	rb.setAngVel(glm::vec3(0.1f, 0.1f, 0.1f));
+	rb.setMass(2.0f);
 
 	//rb.addForce(&g);
 
+	std::cout << glm::to_string(rb.getInvInertia());
+	bool impulseApplied = false;
 
 	// Game loop
 	while (!glfwWindowShouldClose(app.getWindow()))
@@ -103,20 +105,24 @@ int main()
 			rb.setRotate(glm::mat4(R));
 
 			rb.setAcc(rb.applyForces(rb.getPos(), rb.getVel(), t, dt));
-			//rb.setVel(rb.getVel() + (dt * rb.getAcc()));
+			rb.setVel(rb.getVel() + (dt * rb.getAcc()));
 
 			rb.translate(rb.getVel() * dt);
+			glm::vec3 vertArray[100];
 
-			for each (Vertex v in rb.getMesh().getVertices())
+			for (Vertex v : rb.getMesh().getVertices())
 			{
+				vertArray[0] = v.getCoord();
+				vertArray[1] = v.getCoord();
+				Vertex vee = (vertArray[0] + vertArray[1]) / v.getCoord().length();
 				glm::vec4 rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
 				if (rbPos.y <= plane.getPos().y)
-				{
-					rb.translate(glm::vec3(0.0f,1.0f,0.0f));
-					float e = 1.0f;
+				{						
+					rb.translate(glm::vec3(0.0f, 2.0f, 0.0f));
+					float e = 0.7f;
 					glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);
 					glm::vec3 Vr = rb.getVel() + rb.getAngVel();
-					glm::vec3 r = v.getCoord() - rb.getPos();
+					glm::vec3 r = vee.getCoord() - rb.getPos();
 					Vr = glm::cross(Vr, r);
 
 					glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
@@ -130,18 +136,15 @@ int main()
 
 					float Jr = topPart / bottomPart;
 
-					rb.setVel(rb.getVel() + (Jr / rb.getMass() * n));
-					rb.setAngVel(rb.getAngVel() + (Jr * rb.getInvInertia() * (glm::cross(r, n))));
-					
+					rb.setVel(rb.getVel() - (Jr / rb.getMass() * n));
+					rb.setAngVel(rb.getAngVel() - (Jr * rb.getInvInertia() * (glm::cross(r, n))));
 
+					//rb.translate(glm::vec3(0.0f, 1.0f, 0.0f));
 					//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
 					//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 					//rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 				}
-
 			}
-
-
 
 			accumulator -= dt;
 			t += dt;
