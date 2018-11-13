@@ -30,6 +30,7 @@
 // time
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
+bool impulseApplied = false;
 
 // main function
 int main()
@@ -65,14 +66,17 @@ int main()
 	Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	rb.getMesh().setShader(rbShader);
 	rb.translate(glm::vec3(0.0f, 5.0f, 0.0f));
-	rb.setVel(glm::vec3(0.0f, -1.0f, 0.0f));
-	rb.setAngVel(glm::vec3(0.1f, 0.1f, 0.1f));
+	rb.setVel(glm::vec3(0.0f, -2.0f, 0.0f));
+	rb.setAngVel(glm::vec3(2.0f, 3.0f, 1.0f));
 	rb.setMass(2.0f);
 
 	//rb.addForce(&g);
 
 	std::cout << glm::to_string(rb.getInvInertia());
-	bool impulseApplied = false;
+	
+	int vCount = 0;
+	glm::vec3 vAvg;
+	std::vector<glm::vec3> vt[10];
 
 	// Game loop
 	while (!glfwWindowShouldClose(app.getWindow()))
@@ -82,7 +86,7 @@ int main()
 		currentTime = newTime;
 
 		accumulator += frameTime;
-
+		
 		while (accumulator >= dt)
 		{
 
@@ -108,48 +112,69 @@ int main()
 			rb.setVel(rb.getVel() + (dt * rb.getAcc()));
 
 			rb.translate(rb.getVel() * dt);
-			glm::vec3 vertArray[100];
-
+			
+			//if (currentTime > 5.0f && !impulseApplied)
+			//{
+			//	glm::vec3 impulse = glm::vec3(-4.0f, 1.0f, 1.0f);
+			//	glm::vec3 CoM = rb.getPos();
+			//	glm::vec3 impulsePoint = CoM + glm::vec3(1.0f, 2.0f, 0.0f);
+			//	rb.getVel() += impulse / rb.getMass(); //+ impulsePoint;
+			//	//rb.setAngVel(glm::vec3(0.0f, 2.5f, 0.0f));
+			//	rb.getAngVel() += rb.getInvInertia() * (glm::cross((impulsePoint - rb.getPos()), impulse));
+			//	impulseApplied = true;
+			//}
+			glm::vec4 rbPos;
 			for (Vertex v : rb.getMesh().getVertices())
 			{
-				vertArray[0] = v.getCoord();
-				vertArray[1] = v.getCoord();
-				Vertex vee = (vertArray[0] + vertArray[1]) / v.getCoord().length();
-				glm::vec4 rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
+				rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
+
 				if (rbPos.y <= plane.getPos().y)
-				{						
-					rb.translate(glm::vec3(0.0f, 2.0f, 0.0f));
-					float e = 0.7f;
-					glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);
-					glm::vec3 Vr = rb.getVel() + rb.getAngVel();
-					glm::vec3 r = vee.getCoord() - rb.getPos();
-					Vr = glm::cross(Vr, r);
-
-					glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
-
-					float topPart = -(1 + e) * glm::dot(Vr, n);
-					glm::vec3 cross1 = glm::cross(r, n);
-					cross1 = i * cross1;
-					glm::vec3 cross2 = glm::cross(cross1, r);
-
-					float bottomPart = -rb.getMass() + glm::dot(n, (cross2));
-
-					float Jr = topPart / bottomPart;
-
-					rb.setVel(rb.getVel() - (Jr / rb.getMass() * n));
-					rb.setAngVel(rb.getAngVel() - (Jr * rb.getInvInertia() * (glm::cross(r, n))));
-
-					//rb.translate(glm::vec3(0.0f, 1.0f, 0.0f));
-					//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
-					//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
-					//rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+				{
+					vt->push_back(rbPos);
 				}
-			}
 
+			}
+			
+			if (rbPos.y <= plane.getPos().y)
+			{
+				vAvg = vAvg / 4.0f;
+				//rb.translate(glm::vec3(0.0f, 0.6f, 0.0f));
+				float e = 0.7f;
+				glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);
+				glm::vec3 Vr = rb.getVel() + rb.getAngVel();
+				glm::vec3 r = vAvg - rb.getPos();
+				Vr = glm::cross(Vr, r);
+
+				glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
+
+				float topPart = -(1 + e) * glm::dot(Vr, n);
+				glm::vec3 cross1 = glm::cross(r, n);
+				cross1 = i * cross1;
+				glm::vec3 cross2 = glm::cross(cross1, r);
+
+				float bottomPart = -rb.getMass() + glm::dot(n, (cross2));
+
+				float Jr = topPart / bottomPart;
+
+				rb.setVel(rb.getVel() + (Jr / rb.getMass() * n));
+				rb.setAngVel(rb.getAngVel() + (Jr * rb.getInvInertia() * (glm::cross(r, n))));
+
+				rb.translate(glm::vec3(0.0f, 1.0f, 0.0f));
+				//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
+				//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
+				//rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+			}
 			accumulator -= dt;
 			t += dt;
 		}
-
+		
+		for (int i = 0; i < vt->size(); i++)
+		{
+			//std::cout << glm::to_string(vt->at(i));
+			vAvg += vt->at(i);
+		}
+		std::cout << glm::to_string(vAvg);
+		
 		/*
 		**	RENDER
 		*/
@@ -164,7 +189,7 @@ int main()
 
 		app.display();
 	}
-
+	
 	app.terminate();
 
 	return EXIT_SUCCESS;
