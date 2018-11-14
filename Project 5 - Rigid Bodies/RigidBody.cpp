@@ -11,19 +11,19 @@ RigidBody::~RigidBody()
 }
 
 void RigidBody::calcIntertia() {
-	double m = m_mass;
-	double x = m_scale.x;
-	double y = m_scale.y;
-	double z = m_scale.z;
+	float m = m_mass;
+	float x = getScale()[0][0] * 2.0f;
+	float y = getScale()[1][1] * 2.0f;
+	float z = getScale()[2][2] * 2.0f;
 
 	std::cout <<"SCALE:" << x << y << z;
 	
-	glm::mat3 I0;
-	I0[0][0] = pow(12, -1) * m * ((y * y) + (z * z));
-	I0[1][1] = pow(12, -1) * m * (x * x + z * z);
-	I0[2][2] = pow(12, -1) * m * (x * x + y * y);
+	glm::mat3 I0 = glm::mat3(0.0f);
+	I0[0][0] = (1.0f / 12.0f) * m * ((y * y) + (z * z));
+	I0[1][1] = (1.0f / 12.0f) * m * ((x * x) + (z * z));
+	I0[2][2] = (1.0f / 12.0f) * m * ((x * x) + (y * y));
 	
-	m_invInertia = getRotate() * glm::inverse(I0) * glm::transpose(getRotate());
+	setInvInertia(getRotate() * glm::inverse(I0) * glm::transpose(getRotate()));
 	//std::cout << glm::to_string(m_invInertia);
 	//setInvInertia(-I0);
 }
