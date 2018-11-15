@@ -1,22 +1,4 @@
-﻿  OBJLoader.cpp
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(27): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(84): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(121): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(136): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(164): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(262): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(296): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(329): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(378): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\objloader.cpp(386): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  Mesh.cpp
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\mesh.cpp(69): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-g:\teaching\modules\set09119 - physics-based animation\units\02 - newtonian physics\projects\project2\mesh.cpp(122): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(1192): note: see declaration of 'fscanf'
-  main.cpp
-  Application.cpp
-  Generating Code...
-Application.obj : error LNK2019: unresolved external symbol glewInit referenced in function "public: int __cdecl Application::initRender(void)" (?initRender@Application@@QEAAHXZ)
+﻿Application.obj : error LNK2019: unresolved external symbol glewInit referenced in function "public: int __cdecl Application::initRender(void)" (?initRender@Application@@QEAAHXZ)
 Application.obj : error LNK2019: unresolved external symbol glfwInit referenced in function "public: int __cdecl Application::initRender(void)" (?initRender@Application@@QEAAHXZ)
 Application.obj : error LNK2019: unresolved external symbol glfwTerminate referenced in function "public: int __cdecl Application::initRender(void)" (?initRender@Application@@QEAAHXZ)
 main.obj : error LNK2001: unresolved external symbol glfwTerminate
@@ -57,7 +39,7 @@ Mesh.obj : error LNK2001: unresolved external symbol __imp___glewEnableVertexAtt
 Mesh.obj : error LNK2001: unresolved external symbol __imp___glewVertexAttribPointer
 Mesh.obj : error LNK2001: unresolved external symbol __imp___glewBindVertexArray
 Mesh.obj : error LNK2001: unresolved external symbol __imp___glewGenVertexArrays
-.\glew\lib\Release\Win32\glew32s.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
-.\glfw\lib-vc2015\glfw3.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
-.\soil\lib\soil2-debug.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
-G:\Teaching\Modules\SET09119 - Physics-based animation\units\02 - Newtonian Physics\projects\project2\x64\Debug\simulation.exe : fatal error LNK1120: 39 unresolved externals
+.\glew\lib\Release\Win32\glew32s.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+.\glfw\lib-vc2015\glfw3.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+.\soil\lib\soil2-debug.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+C:\Users\Thomas\Desktop\New Physics\Physic2\Project 5 - Rigid Bodies\x64\Debug\simulation.exe : fatal error LNK1120: 39 unresolved externals

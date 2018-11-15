@@ -140,7 +140,6 @@ public:
 private:
 
 	std::vector<Vertex> m_vertices;
-
 	unsigned int m_numIndices;
 	glm::mat4 m_translate;
 	glm::mat4 m_rotate;

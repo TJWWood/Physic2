@@ -1,6 +1,9 @@
 #include "Mesh.h"
 #include <errno.h>
-
+#include <set>
+#include <list>
+#include <algorithm>
+#include "glm/ext.hpp"
 /*
 **	MESH 
 */
@@ -153,14 +156,45 @@ Mesh::Mesh(MeshType type)
 
 		// number of vertices
 		m_numIndices = 36;
-
 		break;
 	}
 
 	m_vertices = std::vector<Vertex>(std::begin(vertices), std::end(vertices));
-	
+	for each(Vertex v in m_vertices)
+	{
+		//std::cout << glm::to_string(v.getCoord()) << std::endl;
+	}
+	std::vector<Vertex> uniques;
 
-	//create mesh
+
+
+	bool noDuplicates = true;
+	for each (Vertex v in m_vertices)
+	{
+
+		for each(Vertex v2 in uniques)
+			{
+				if (v.getCoord() == v2.getCoord())
+				{
+					noDuplicates = false;
+				}
+
+			}
+		
+
+		if (noDuplicates == true)
+		{
+			uniques.push_back(v.getCoord());
+		}
+
+		noDuplicates = true;
+	}
+	std::cout << "Total Vertices: " << m_vertices.size();
+	m_vertices.clear();
+	m_vertices = uniques;
+	std::cout << "UNIQUE ARRAY: " << uniques.size();
+
+
 	initMesh(vertices, normals);
 	//initMesh(vertices, normals, sizeof(vertices));
 

@@ -67,7 +67,7 @@ public:
 
 	// physical properties
 	void setCor(float cor) { m_cor = cor; }
-	void virtual setMass(float mass) { m_mass = mass; }
+	void setMass(float mass) { m_mass = mass; }
 
 
 	Body();
@@ -76,7 +76,7 @@ public:
 
 	void translate(const glm::vec3 &vect);
 	void rotate(float angle, const glm::vec3 &vect);
-	void virtual scale(const glm::vec3 &vect);
+	void scale(const glm::vec3 &vect);
 	void addForce(Force *f) { m_forces.push_back(f); }
 
 };

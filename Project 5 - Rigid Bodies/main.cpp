@@ -72,7 +72,7 @@ int main()
 
 	//rb.addForce(&g);
 
-	std::cout << glm::to_string(rb.getInvInertia());
+	//std::cout << glm::to_string(rb.getInvInertia());
 	
 	
 	
@@ -89,7 +89,7 @@ int main()
 
 		accumulator += frameTime;
 		
-		std::cout << glm::to_string(vAvg);
+		
 		while (accumulator >= dt)
 		{
 
@@ -116,58 +116,63 @@ int main()
 
 			rb.translate(rb.getVel() * dt);
 			
-			// IMUPLSES WORKING!!!!!
-			if (currentTime > 2.0f && !impulseApplied)
+			// IMUPLSES HERE
+			if (t > 2.0f && !impulseApplied)
 			{
 				glm::vec3 impulse = glm::vec3(-4.0f, 0.0f, 0.0f);
 				glm::vec3 CoM = rb.getPos();
-				glm::vec3 impulsePoint = CoM + glm::vec3(0.0f, 0.0f, 1.0f);
+				glm::vec3 impulsePoint = CoM + glm::vec3(0.0f, -1.0f, 0.0f);
 				rb.setVel(rb.getVel() + (impulse / rb.getMass()));
 				
 				rb.setAngVel(rb.getAngVel() + rb.getInvInertia() * (glm::cross((impulsePoint - rb.getPos()), impulse)));
 				impulseApplied = true;
 			}
 			
-
+			//COLLISION IMPULSE HERE
 			//glm::vec4 rbPos;
 			//for (Vertex v : rb.getMesh().getVertices())
 			//{
 			//	rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
 
-			//	if (rbPos.y <= plane.getPos().y)
+			//	if (rbPos.y < plane.getPos().y)
 			//	{
 			//		vt.push_back(rbPos);
 			//		std::cout << std::endl << "Amount: " << vt.size() << std::endl;
-			//		//std::cout << glm::to_string(rbPos);
+			//		std::cout << glm::to_string(rbPos);
 			//	}
+
 			//}
-			//
-			//if (rbPos.y <= plane.getPos().y)
+
+			//if (vt.size() > 0)
 			//{
+			//	
 			//	for (int i = 0; i < vt.size(); i++)
 			//	{
 			//		vAvg += vt.at(i);
 			//	}
-
-			//	std::cout << std::endl << "AVERAGE: " << glm::to_string(vAvg) << std::endl;
 			//	vAvg /= vt.size();
-			//	rb.translate(glm::vec3(0.0f, 40.0f, 0.0f));
-			//	float e = 1.0f;
+			//	
+			//	std::cout << std::endl << "AVERAGE: " << glm::to_string(vAvg) << std::endl;
+			//	
+			//	rb.translate(glm::vec3(0.0f, 0.04f, 0.0f));
+			//	float e = 0.7f;
 			//	glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);	
-			//	glm::vec3 r = rb.getPos() - vAvg;
-			//	glm::vec3 Vr = glm::cross((rb.getVel() + rb.getAngVel()), r);
+			//	glm::vec3 r = vAvg - rb.getPos();
+			//	glm::vec3 Vr = rb.getVel() + glm::cross(rb.getAngVel(), r);
 
-			//	glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
+			//	//glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
 
-			//	float topPart = glm::dot(-(1 + e) * Vr, n);
+			//	float topPart = -(1 + e) * glm::dot(Vr, n);
 
-			//	float bottomPart = glm::dot((rb.getMass() + n), glm::cross((i * glm::cross(r, n)), r));
+			//	float bottomPart = (1 / rb.getMass()) + glm::dot(n, glm::cross(rb.getInvInertia() * glm::cross(r, n), r));
 
 			//	float Jr = topPart / bottomPart;
 
-			//	rb.setVel(rb.getVel() + (Jr / rb.getMass() * n));
-			//	rb.setAngVel(rb.getAngVel() + ((Jr * rb.getInvInertia()) * (glm::cross(r, n))));
+			//	rb.setVel(rb.getVel() + (Jr / rb.getMass()) * n);
+			//	rb.setAngVel(rb.getAngVel() + Jr * rb.getInvInertia() * (glm::cross(r, n)));
 
+			//	vt.clear();
+			//	vAvg = glm::vec3(0.0f, 0.0f, 0.0f);
 			//	//rb.translate(glm::vec3(0.0f, 1.0f, 0.0f));
 			//	//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
 			//	//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -175,6 +180,7 @@ int main()
 			//}
 			accumulator -= dt;
 			t += dt;
+			
 		}
 		
 		/*
