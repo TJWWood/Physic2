@@ -1,0 +1,6 @@
+﻿  main.cpp
+c:\users\thomas\desktop\new physics\physic2\final coursework\main.cpp(98): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\thomas\desktop\new physics\physic2\final coursework\main.cpp(126): warning C4305: 'argument': truncation from 'const double' to 'GLfloat'
+c:\users\thomas\desktop\new physics\physic2\final coursework\main.cpp(141): warning C4305: 'argument': truncation from 'const double' to 'float'
+c:\users\thomas\desktop\new physics\physic2\final coursework\main.cpp(141): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  simulation.vcxproj -> C:\Users\Thomas\Desktop\New Physics\Physic2\Final Coursework\Debug\simulation.exe
