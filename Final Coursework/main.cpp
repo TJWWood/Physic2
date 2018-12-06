@@ -78,13 +78,13 @@ int main()
 
 	Gravity g = Gravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
-	int NUM_SPHERES = 30;
+	const int NUM_SPHERES = 30;
 
 	//RigidBody rb = RigidBody();
 	
 	Mesh m = Mesh::Mesh("resources/models/sphere.obj");
 
-	Sphere sphere[30];
+	Sphere sphere[NUM_SPHERES];
 	for (int i = 0; i < NUM_SPHERES; i++)
 	{
 		sphere[i].setMesh(m);
@@ -93,15 +93,17 @@ int main()
 		sphere[i].getMesh().setShader(rbShader);
 		sphere[i].setRadius(1.0f);
 		sphere[i].scale(glm::vec3(sphere->getRadius(), sphere->getRadius(), sphere->getRadius()));
-		std::mt19937 gen(2 * i * 10);
-		std::uniform_int_distribution<int> dis(-20, 20);
-		float randPos = dis(gen);
-		sphere[i].translate(glm::vec3(randPos, 1.0f, randPos));
 
-		//sphere[i].setVel(glm::vec3(rand()%20 + (-20), 0.0f, rand() % 20 + (-20)));
+		std::random_device rd;
+		std::mt19937 e2(rd());
+		std::uniform_real_distribution<float> dist(-20.0f, 20.0f);
+		std::uniform_real_distribution<float> moveDir(-10.0f, 10.0f);
+		sphere[i].translate(glm::vec3(dist(e2), 1.0f, dist(e2)));
+		sphere[i].setVel(glm::vec3(moveDir(e2), 0.0f, moveDir(e2)));
 		sphere[i].setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 		sphere[i].setMass(2.0f);
 	}
+
 
 	std::vector<glm::vec3> vt;
 	glm::vec3 vAvg = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -146,55 +148,33 @@ int main()
 
 
 			//COLLISION IMPULSE HERE
-			//glm::vec4 rbPos;
-			//for (Vertex v : rb.getMesh().getVertices())
-			//{
-			//	rbPos = rb.getMesh().getModel() * glm::vec4(v.getCoord(), 1.0f);
+			glm::vec4 rbPos;
+			for each(Sphere s in sphere)
+			{
+				if (s.getPos().y == leftWall.getPos().x || s.getPos().x == rightWall.getPos().x || s.getPos().z == topWall.getPos().z || s.getPos().z == bottomWall.getPos().z)
+				{
+					std::cout << "COLLISION";
+					//s.translate(glm::vec3(0.0f, 0.0f, 0.0f));
+					float e = 0.7f;
+					glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);
+					glm::vec3 r = vAvg - s.getPos();
+					glm::vec3 Vr = s.getVel() + glm::cross(s.getAngVel(), r);
 
-			//	if (rbPos.y < plane.getPos().y)
-			//	{
-			//		vt.push_back(rbPos);
-			//		std::cout << std::endl << "Amount: " << vt.size() << std::endl;
-			//		std::cout << glm::to_string(rbPos);
-			//	}
+					//glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
 
-			//}
+					float topPart = -(1 + e) * glm::dot(Vr, n);
 
-			//if (vt.size() > 0)
-			//{
-			//	
-			//	for (int i = 0; i < vt.size(); i++)
-			//	{
-			//		vAvg += vt.at(i);
-			//	}
-			//	vAvg /= vt.size();
-			//	
-			//	std::cout << std::endl << "AVERAGE: " << glm::to_string(vAvg) << std::endl;
-			//	
-			//	rb.translate(glm::vec3(0.0f, 0.04f, 0.0f));
-			//	float e = 0.7f;
-			//	glm::vec3 n = glm::vec3(0.0f, 1.0f, 0.0f);	
-			//	glm::vec3 r = vAvg - rb.getPos();
-			//	glm::vec3 Vr = rb.getVel() + glm::cross(rb.getAngVel(), r);
+					float bottomPart = (1 / s.getMass()) + glm::dot(n, glm::cross(s.getInvInertia() * glm::cross(r, n), r));
 
-			//	//glm::mat3 i = rb.getRotate() * rb.getInvInertia() * glm::transpose(rb.getInvInertia());
+					float Jr = topPart / bottomPart;
 
-			//	float topPart = -(1 + e) * glm::dot(Vr, n);
+					s.setVel(s.getVel() + (Jr / s.getMass()) * n);
+					s.setAngVel(s.getAngVel() + Jr * s.getInvInertia() * (glm::cross(r, n)));
+				}
 
-			//	float bottomPart = (1 / rb.getMass()) + glm::dot(n, glm::cross(rb.getInvInertia() * glm::cross(r, n), r));
+			}
 
-			//	float Jr = topPart / bottomPart;
-
-			//	rb.setVel(rb.getVel() + (Jr / rb.getMass()) * n);
-			//	rb.setAngVel(rb.getAngVel() + Jr * rb.getInvInertia() * (glm::cross(r, n)));
-
-			//	vt.clear();
-			//	vAvg = glm::vec3(0.0f, 0.0f, 0.0f);
-			//	//rb.translate(glm::vec3(0.0f, 1.0f, 0.0f));
-			//	//rb.setAcc(glm::vec3(0.0f, 0.0f, 0.0f));
-			//	//rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
-			//	//rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-			//}
+			
 			accumulator -= dt;
 			t += dt;
 
