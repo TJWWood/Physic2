@@ -31,7 +31,6 @@
 // time
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
-bool impulseApplied = false;
 
 // main function
 int main()
@@ -78,46 +77,48 @@ int main()
 
 	Gravity g = Gravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
-	const int NUM_SPHERES = 30;
+	const int NUM_SPHERES = 1200;
 
-	//RigidBody rb = RigidBody();
-	
 	Mesh m = Mesh::Mesh("resources/models/sphere.obj");
 
 	RigidBody sphere[NUM_SPHERES];
-
+	std::random_device rd;
+	std::mt19937 e2(rd());
+	std::uniform_real_distribution<float> dist(-200.0f, 200.0f);
+	std::uniform_real_distribution<float> moveDir(-5.0f, 5.0f);
+	Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	for (int i = 0; i < NUM_SPHERES; i++)
 	{
 		sphere[i].setMesh(m);
-		//rb.scale(glm::vec3(1.0f, 1.0f, 1.0f));
-		Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
+		
 		sphere[i].getMesh().setShader(rbShader);
-		//sphere[i].setRadius(1.0f);
 		sphere[i].scale(glm::vec3(1.0f, 1.0f, 1.0f));
 
-		std::random_device rd;
-		std::mt19937 e2(rd());
-		std::uniform_real_distribution<float> dist(-20.0f, 20.0f);
-		std::uniform_real_distribution<float> moveDir(-10.0f, 10.0f);
 		sphere[i].translate(glm::vec3(dist(e2), 1.0f, dist(e2)));
 		sphere[i].setVel(glm::vec3(moveDir(e2), 0.0f, moveDir(e2)));
 		sphere[i].setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 		sphere[i].setMass(2.0f);
 	}
 
-
-	std::vector<glm::vec3> vt;
-	glm::vec3 vAvg = glm::vec3(0.0f, 0.0f, 0.0f);
+	std::vector<RigidBody*> topLeft;
+	std::vector<RigidBody*> topLeftLeft;
+	std::vector<RigidBody*> topRight;
+	std::vector<RigidBody*> topRightRight;
+	std::vector<RigidBody*> bottomLeft;
+	std::vector<RigidBody*> bottomLeftLeft;
+	std::vector<RigidBody*> bottomRight;
+	std::vector<RigidBody*> bottomRightRight;
 
 	// Game loop
 	while (!glfwWindowShouldClose(app.getWindow()))
 	{
+		app.showFPS();
 		double newTime = glfwGetTime();
 		double frameTime = newTime - currentTime;
 		currentTime = newTime;
 
 		accumulator += frameTime;
-
+		
 		while (accumulator >= dt)
 		{
 
@@ -130,69 +131,262 @@ int main()
 			/*
 			**	SIMULATION
 			*/
-			for (int i = 0; i < NUM_SPHERES; i++)
+			//float e = 1.0f;
+			for each(RigidBody &sphere1 in sphere)
 			{
-				sphere[i].setAngVel(sphere[i].getAngVel() + dt * sphere[i].getAngAcc());
-				glm::mat3 angVelSkew = glm::matrixCross3(sphere[i].getAngVel());
-				glm::mat3 R = glm::mat3(sphere[i].getRotate());
-
-				R += dt * angVelSkew * R;
-				R = glm::orthonormalize(R);
-				sphere[i].setRotate(glm::mat4(R));
-
-				sphere[i].setAcc(sphere[i].applyForces(sphere[i].getPos(), sphere[i].getVel(), t, dt));
-				sphere[i].setVel(sphere[i].getVel() + (dt * sphere[i].getAcc()));
-
-				sphere[i].translate(sphere[i].getVel() * dt);
-			
-				glm::vec3 n;
-			//std::cout << "Reaches1";
-			//COLLISION IMPULSE HERE
-
-				float e = 1.0f;
-				glm::vec3 r = sphere[i].getPos() + 1.0f;
-				glm::vec3 Vr = sphere[i].getVel() + glm::cross(sphere[i].getAngVel(), r);
-
-				//glm::mat3 i = sphere[i].getRotate() * sphere[i].getInvInertia() * glm::transpose(sphere[i].getInvInertia());
-
-				float topPart = -(1 + e) * glm::dot(Vr, n);
-
-				float bottomPart = (1 / sphere[i].getMass()) + glm::dot(n, glm::cross(sphere[i].getInvInertia() * glm::cross(r, n), r));
-
-				float Jr = topPart / bottomPart;
-				if (sphere[i].getPos().x - 1.0f <= -30.0f)
+				sphere1.translate(sphere1.getVel() * dt);
+				if (sphere1.getPos().x - 1.0f <= -1000.0f)
 				{
-					n = glm::vec3(1.0f, 0.0f, 0.0f);
-					sphere[i].translate(glm::vec3(0.2f, 0.0f, 0.0f));
-					sphere[i].setVel(sphere[i].getVel() + (Jr / sphere[i].getMass()) * n);
+					sphere1.translate(glm::vec3(0.2f, 0.0f, 0.0f));
+					sphere1.getVel().x *= -1.0f;
 				}
-				else if (sphere[i].getPos().x + 1.0f >= 30.0f)
+				else if (sphere1.getPos().x + 1.0f >= 1000.0f)
 				{
-					n = glm::vec3(-1.0f, 0.0f, 0.0f);
-					sphere[i].translate(glm::vec3(-0.2f, 0.0f, 0.0f));
-					sphere[i].setVel(sphere[i].getVel() + (Jr / sphere[i].getMass()) * n);
+					sphere1.translate(glm::vec3(-0.2f, 0.0f, 0.0f));
+					sphere1.getVel().x *= -1.0f;
 				}
-				else if (sphere[i].getPos().z + 1.0f >= 30.0f)
+				else if (sphere1.getPos().z + 1.0f >= 1000.0f)
 				{
-					n = glm::vec3(0.0f, 0.0f, -1.0f);
-					sphere[i].translate(glm::vec3(0.0f, 0.0f, -0.2f));
-					sphere[i].setVel(sphere[i].getVel() + (Jr / sphere[i].getMass()) * n);
+					sphere1.translate(glm::vec3(0.0f, 0.0f, -0.2f));
+					sphere1.getVel().z *= -1.0f;
 				}
-				else if(sphere[i].getPos().z - 1.0f <= -30.0f)
+				else if (sphere1.getPos().z - 1.0f <= -1000.0f)
 				{
-					n = glm::vec3(0.0f, 0.0f, 1.0f);
-					sphere[i].translate(glm::vec3(0.0f, 0.0f, 0.2f));
-					sphere[i].setVel(sphere[i].getVel() + (Jr / sphere[i].getMass()) * n);
+					sphere1.translate(glm::vec3(0.0f, 0.0f, 0.2f));
+					sphere1.getVel().z *= -1.0f;
 				}
-
-				//std::cout << "REACHED 2";
 				
-				//sphere[i].setVel(sphere[i].getVel() + (Jr / sphere[i].getMass()) * n);
-				//sphere[i].setAngVel(sphere[i].getAngVel() + Jr * sphere[i].getInvInertia() * (glm::cross(r, n)));
+				if (sphere1.getPos().x < 0.0f && sphere1.getPos().x > -500.0f && sphere1.getPos().z < 0.0f)
+				{
+					topLeft.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x < -500.0f && sphere1.getPos().z < 0.0f)
+				{
+					topLeftLeft.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x < 0.0f && sphere1.getPos().x > -500.0f && sphere1.getPos().z > 0.0f)
+				{
+					bottomLeft.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x < -500.0f && sphere1.getPos().z > 0.0f)
+				{
+					bottomLeftLeft.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x > 0.0f && sphere1.getPos().x < 500.0f && sphere1.getPos().z < 0.0f)
+				{
+					topRight.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x > 500.0f && sphere1.getPos().z < 0.0f)
+				{
+					topRightRight.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x > 0.0f && sphere1.getPos().x < 500.0f && sphere1.getPos().z > 0.0f)
+				{
+					bottomRight.push_back(&sphere1);
+				}
+				if (sphere1.getPos().x > 500.0f && sphere1.getPos().z > 0.0f)
+				{
+					bottomRightRight.push_back(&sphere1);
+				}
 
-				vt.clear();
-				vAvg = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
+
+			for each(RigidBody* l in topLeft)
+			{
+				for each (RigidBody* r in topLeft)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+			for each(RigidBody* l in topLeftLeft)
+			{
+				for each (RigidBody* r in topLeftLeft)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+
+			for each(RigidBody* l in topRight)
+			{
+				for each (RigidBody* r in topRight)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+			for each(RigidBody* l in topRightRight)
+			{
+				for each (RigidBody* r in topRightRight)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+
+			for each(RigidBody* l in bottomLeft)
+			{
+				for each (RigidBody* r in bottomLeft)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+			for each(RigidBody* l in bottomLeftLeft)
+			{
+				for each (RigidBody* r in bottomLeftLeft)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+
+			for each(RigidBody* l in bottomRight)
+			{
+				for each (RigidBody* r in bottomRight)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+			for each(RigidBody* l in bottomRightRight)
+			{
+				for each (RigidBody* r in bottomRightRight)
+				{
+					//glm::vec3 r = sphere1.getPos();
+					glm::vec3 Vr = glm::normalize(r->getVel() - l->getVel());
+					glm::vec3 n = glm::normalize(r->getPos() - l->getPos());
+					float n2 = glm::dot(r->getVel(), n);
+					float n1 = glm::dot(l->getVel(), n);
+					//float topPart = -(1 + e) * glm::dot(Vr, n);
+					float bottomPart = (2.0 * (n1 - n2) / l->getMass() + r->getMass());
+					//float Jr = topPart / bottomPart;
+					if (glm::fastDistance(l->getPos(), r->getPos()) < 2.0f && l != r)
+					{
+						//glm::vec3 overlap = 2.0f - (sSphere.getPos() - sphere1.getPos());
+						//sphere1.translate((sphere1.getVel() * -1.0f) * overlap / 2);
+						//sSphere.translate((sSphere.getVel() * -1.0f) * overlap / 2);
+						l->setVel(l->getVel() - (bottomPart / l->getMass()) * n);
+						r->setVel(r->getVel() + (bottomPart / r->getMass()) * n);
+						//std::cout << "Collision";
+					}
+				}
+			}
+
+			topLeft.clear();
+			topLeftLeft.clear();
+			topRight.clear();
+			topRightRight.clear();
+			bottomLeft.clear();
+			bottomLeftLeft.clear();
+			bottomRight.clear();
+			bottomRightRight.clear();
 			accumulator -= dt;
 			t += dt;
 		}
@@ -204,15 +398,15 @@ int main()
 		app.clear();
 		// draw groud plane
 		app.draw(plane);
-		app.draw(leftWall);
-		app.draw(rightWall);
-		app.draw(topWall);
-		app.draw(bottomWall);
+		//app.draw(leftWall);
+		//app.draw(rightWall);
+		//app.draw(topWall);
+		//app.draw(bottomWall);
 
 		//draw rb
-		for (int i = 0; i < NUM_SPHERES; i++)
+		for each (RigidBody sphere in sphere)
 		{
-			app.draw(sphere[i].getMesh());
+			app.draw(sphere.getMesh());
 		}
 		
 		app.display();
