@@ -78,7 +78,7 @@ int main()
 
 	Gravity g = Gravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
-	const int NUM_SPHERES = 30;
+	const int NUM_SPHERES = 1000;
 
 	//RigidBody rb = RigidBody();
 	
@@ -87,7 +87,7 @@ int main()
 	RigidBody sphere[NUM_SPHERES];
 	std::random_device rd;
 	std::mt19937 e2(rd());
-	std::uniform_real_distribution<float> dist(-20.0f, 20.0f);
+	std::uniform_real_distribution<float> dist(-200.0f, 200.0f);
 	std::uniform_real_distribution<float> moveDir(-20.0f, 20.0f);
 	for (int i = 0; i < NUM_SPHERES; i++)
 	{
@@ -133,22 +133,22 @@ int main()
 
 				sphere1.translate(sphere1.getVel() * dt);
 
-				if (sphere1.getPos().x - 1.0f <= -30.0f)
+				if (sphere1.getPos().x - 1.0f <= -1000.0f)
 				{
 					sphere1.translate(glm::vec3(0.2f, 0.0f, 0.0f));
 					sphere1.getVel().x *= -1.0f;
 				}
-				else if (sphere1.getPos().x + 1.0f >= 30.0f)
+				else if (sphere1.getPos().x + 1.0f >= 1000.0f)
 				{
 					sphere1.translate(glm::vec3(-0.2f, 0.0f, 0.0f));
 					sphere1.getVel().x *= -1.0f;
 				}
-				else if (sphere1.getPos().z + 1.0f >= 30.0f)
+				else if (sphere1.getPos().z + 1.0f >= 1000.0f)
 				{
 					sphere1.translate(glm::vec3(0.0f, 0.0f, -0.2f));
 					sphere1.getVel().z *= -1.0f;
 				}
-				else if (sphere1.getPos().z - 1.0f <= -30.0f)
+				else if (sphere1.getPos().z - 1.0f <= -1000.0f)
 				{
 					sphere1.translate(glm::vec3(0.0f, 0.0f, 0.2f));
 					sphere1.getVel().z *= -1.0f;
